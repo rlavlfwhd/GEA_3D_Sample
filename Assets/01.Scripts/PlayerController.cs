@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Cinemachine;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
@@ -21,6 +22,11 @@ public class PlayerController : MonoBehaviour
     public bool isGrounded;
     private bool isCursorLocked = true;
 
+    public int maxHP = 100;
+    private int currentHP;
+
+    public Slider hpSlider;
+
 
     private void Start()
     {
@@ -29,10 +35,18 @@ public class PlayerController : MonoBehaviour
 
         controller = GetComponent<CharacterController>();
         pov = virtualCam.GetCinemachineComponent<CinemachinePOV>();
+
+        currentHP = maxHP;
+        hpSlider.value = 1f;
     }
 
     private void Update()
     {
+        if(Input.GetKeyDown(KeyCode.Tab))
+        {
+            pov.m_HorizontalAxis.Value = transform.eulerAngles.y;
+            pov.m_VerticalAxis.Value = 0f;
+        }
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             isCursorLocked = false;
@@ -98,5 +112,24 @@ public class PlayerController : MonoBehaviour
 
         float currentFov = virtualCam.m_Lens.FieldOfView;
         virtualCam.m_Lens.FieldOfView = Mathf.Lerp(currentFov, targetFov, fovSmoothSpeed * Time.deltaTime);
+    }
+
+    public void TakeDamage(int damage)
+    {
+        currentHP -= damage;
+        hpSlider.value = (float)currentHP / maxHP;
+
+        if(currentHP <= 0)
+        {
+            Die();
+        }
+    }
+
+    void Die()
+    {
+        Destroy(gameObject);
+        #if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+        #endif
     }
 }
