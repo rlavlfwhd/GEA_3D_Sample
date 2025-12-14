@@ -89,11 +89,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27af165e28db56c48bc7018117ecd16c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  icon: {fileID: 4013397487715780362}
-  countText: {fileID: 4206610050238628618}
-  dirtIcon: {fileID: 21300000, guid: 480c7d4c327b9e447a26e90be95c0818, type: 3}
-  grassIcon: {fileID: 21300000, guid: 358bb367ec57a3842a68cc9ac7774a2f, type: 3}
-  waterIcon: {fileID: 21300000, guid: 48a5a34b05e935d4bba8722675e152b7, type: 3}
+  itemImage: {fileID: 4013397487715780362}
+  itemText: {fileID: 4206610050238628618}
+  blockType: 0
 --- !u!1 &5991132896098487321
 GameObject:
   m_ObjectHideFlags: 0

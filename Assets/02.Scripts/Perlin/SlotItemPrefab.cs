@@ -3,40 +3,32 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.EventSystems;
 
-public class SlotItemPrefab : MonoBehaviour
+public class SlotItemPrefab : MonoBehaviour, IPointerClickHandler
 {
-    [Header("UI Components")]
-    public Image icon;
-    public TextMeshProUGUI countText;
+    public Image itemImage;
+    public TextMeshProUGUI itemText;
+    public ItemType blockType;
+    public CraftingPanel craftingPanel;
 
-    [Header("Block Icons")]
-    public Sprite dirtIcon;
-    public Sprite grassIcon;
-    public Sprite waterIcon;
-
-    public void Setup(BlockType type, int count)
+    public void ItemSetting(Sprite itemSprite, string txt, ItemType type)
     {
-        if (icon != null)
-        {
-            icon.sprite = GetIcon(type);
-            icon.enabled = (icon.sprite != null);
-        }
-
-        if (countText != null)
-        {
-            countText.text = count > 0 ? count.ToString() : "";
-        }
+        itemImage.sprite = itemSprite;
+        itemText.text = txt;
+        blockType = type;
     }
 
-    Sprite GetIcon(BlockType type)
+    void Awake()
     {
-        switch (type)
-        {
-            case BlockType.Dirt: return dirtIcon;
-            case BlockType.Grass: return grassIcon;
-            case BlockType.Water: return waterIcon;
-            default: return null;
-        }
+        if (!craftingPanel) craftingPanel = FindObjectOfType<CraftingPanel>(true);
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        if (eventData.button != PointerEventData.InputButton.Right) return;
+        if (!craftingPanel) return;
+
+        craftingPanel.AddPlanned(blockType, 1);
     }
 }

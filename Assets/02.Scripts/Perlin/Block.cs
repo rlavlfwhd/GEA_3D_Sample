@@ -2,10 +2,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum BlockType { Dirt, Grass, Water }
+public enum ItemType
+{
+    Dirt, Grass, 
+    Wood, 
+    Stone, Diamond, 
+    Water, 
+    Axe, Shovel, Pickaxe
+}
 public class Block : MonoBehaviour
 {
-    public BlockType type = BlockType.Dirt;
+    public ItemType type = ItemType.Dirt;
     public int maxHP = 3;
     public int hp;
     public int dropCount = 1;

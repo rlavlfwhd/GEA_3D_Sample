@@ -6,9 +6,72 @@ using UnityEngine.UI;
 
 public class InventoryUI : MonoBehaviour
 {
+    public Sprite dirtSprite;
+    public Sprite diamondSprite;
+    public Sprite grassSprite;
+    public Sprite waterSprite;
+    public Sprite woodSprite;
+    public Sprite stoneSprite;
+
+    public Sprite axeSprite;
+    public Sprite shovelSprite;
+    public Sprite pickaxeSprite;
+
     public List<Transform> Slot = new List<Transform>();
     public GameObject SlotItem;
     List<GameObject> items = new List<GameObject>();
+
+    public int selectedIndex = -1;
+
+    private void Update()
+    {
+        for(int i = 0; i < Mathf.Min(9, Slot.Count); i++)
+        {
+            if(Input.GetKeyDown(KeyCode.Alpha1 + i))
+            {
+                SetSelectedIndex(i);
+            }
+        }
+    }
+
+    public void SetSelectedIndex(int idx)
+    {
+        ResetSelection();
+        if(selectedIndex == idx)
+        {
+            selectedIndex = -1;
+        }
+        else
+        {
+            if(idx >= items.Count)
+            {
+                selectedIndex = -1;
+            }
+            else
+            {
+                SetSelection(idx);
+                selectedIndex = idx;
+            }
+        }
+    }
+
+    public void ResetSelection()
+    {
+        foreach(var slot in Slot)
+        {
+            slot.GetComponent<Image>().color = Color.white;
+        }
+    }
+
+    public void SetSelection(int _idx)
+    {
+        Slot[_idx].GetComponent<Image>().color = Color.yellow;
+    }
+
+    public ItemType GetInventorySlot()
+    {
+        return items[selectedIndex].GetComponent<SlotItemPrefab>().blockType;
+    }
 
     public void UpdateInventory(Inventory myInven)
     {
@@ -19,27 +82,44 @@ public class InventoryUI : MonoBehaviour
         items.Clear();
 
         int idx = 0;
+
         foreach(var item in myInven.items)
         {
-            if (idx >= Slot.Count) break;
-
-            var parent = Slot[idx];
-            if (parent == null)
-            {
-                idx++;
-                continue;
-            }
-
-            var go = Instantiate(SlotItem, parent);
+            var go = Instantiate(SlotItem, Slot[idx].transform);
             go.transform.localPosition = Vector3.zero;
             SlotItemPrefab sItem = go.GetComponent<SlotItemPrefab>();
-
-            if (sItem != null)
-            {
-                sItem.Setup(item.Key, item.Value);
-            }
-
             items.Add(go);
+
+            switch(item.Key)
+            {
+                case ItemType.Dirt:
+                    sItem.ItemSetting(dirtSprite, "x" + item.Value.ToString(), item.Key);
+                    break;
+                case ItemType.Grass:
+                    sItem.ItemSetting(grassSprite, "x" + item.Value.ToString(), item.Key);
+                    break;
+                case ItemType.Water:
+                    sItem.ItemSetting(waterSprite, "x" + item.Value.ToString(), item.Key);
+                    break;
+                case ItemType.Diamond:
+                    sItem.ItemSetting(diamondSprite, "x" + item.Value.ToString(), item.Key);
+                    break;
+                case ItemType.Axe:
+                    sItem.ItemSetting(axeSprite, "x" + item.Value.ToString(), item.Key);
+                    break;
+                case ItemType.Shovel:
+                    sItem.ItemSetting(shovelSprite, "x" + item.Value.ToString(), item.Key);
+                    break;
+                case ItemType.Pickaxe:
+                    sItem.ItemSetting(pickaxeSprite, "x" + item.Value.ToString(), item.Key);
+                    break;
+                case ItemType.Wood:
+                    sItem.ItemSetting(woodSprite, "x" + item.Value.ToString(), item.Key);
+                    break;
+                case ItemType.Stone:
+                    sItem.ItemSetting(stoneSprite, "x" + item.Value.ToString(), item.Key);
+                    break;
+            }
 
             idx++;
         }

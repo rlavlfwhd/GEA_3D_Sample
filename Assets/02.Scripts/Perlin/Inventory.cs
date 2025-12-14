@@ -4,19 +4,41 @@ using UnityEngine;
 
 public class Inventory : MonoBehaviour
 {
-    public Dictionary<BlockType, int> items = new();
+    public Dictionary<ItemType, int> items = new();
+    InventoryUI inventoryUI;
 
-    public void Add(BlockType type, int count = 1)
+    private void Start()
+    {
+        inventoryUI = FindObjectOfType<InventoryUI>();
+    }
+
+    public int GetCount(ItemType id)
+    {
+        items.TryGetValue(id, out var count);
+        return count;
+    }
+
+    public void Add(ItemType type, int count = 1)
     {
         if (!items.ContainsKey(type)) items[type] = 0;
         items[type] += count;
+        inventoryUI.UpdateInventory(this);
     }
 
-    public bool Consume(BlockType type, int count = 1)
+    public bool Consume(ItemType type, int count = 1)
     {
         if(!items.TryGetValue(type, out var have) || have < count) return false;
 
         items[type] = have - count;
+
+        if (items[type] == 0)
+        {
+            items.Remove(type);
+            inventoryUI.selectedIndex = -1;
+            inventoryUI.ResetSelection();
+        }
+
+        inventoryUI.UpdateInventory(this);
         return true;
     }
 }
