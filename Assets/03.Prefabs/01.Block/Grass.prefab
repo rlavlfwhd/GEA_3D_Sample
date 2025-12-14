@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 8065686085662956648}
   m_Layer: 0
   m_Name: Grass
-  m_TagString: Block
+  m_TagString: Shovels
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -118,8 +118,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 371b077f0753ab848aae46ef19e53d0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  type: 1
-  maxHP: 1
+  data: {fileID: 11400000, guid: e4afa24eba5260840addcd50f9d8afe7, type: 2}
   hp: 0
   dropCount: 1
-  mineable: 1

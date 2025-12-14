@@ -1064,15 +1064,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fb6ab478255e42429656b22c97cc571, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dirtSprite: {fileID: 21300000, guid: 480c7d4c327b9e447a26e90be95c0818, type: 3}
-  diamondSprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
-  grassSprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  waterSprite: {fileID: 21300000, guid: 48a5a34b05e935d4bba8722675e152b7, type: 3}
-  woodSprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
-  stoneSprite: {fileID: 21300000, guid: 358bb367ec57a3842a68cc9ac7774a2f, type: 3}
-  axeSprite: {fileID: 21300000, guid: d118ca2bc3eef2d4ebf74108637524d2, type: 3}
-  shovelSprite: {fileID: 21300000, guid: be503064afe0a8749a20146bc7bf106b, type: 3}
-  pickaxeSprite: {fileID: 21300000, guid: b3d1cead4a78dab499f9a7051cf9386b, type: 3}
   Slot:
   - {fileID: 184281236}
   - {fileID: 610760179}
@@ -1451,18 +1442,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b5582e5dd85ade4788aa7905b0348ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dirtPrefab: {fileID: 7758082428115946784, guid: 2cbbb44db5748d74d98ab478791a1c0f,
-    type: 3}
-  grassPrefab: {fileID: 239850220055032100, guid: 0097002da5973b14abcba9bc22e1fc83,
-    type: 3}
-  woodPrefab: {fileID: 6236868069935338458, guid: e6d74262ffb08aa48bd64282f739f0a1,
-    type: 3}
-  stonePrefab: {fileID: 3517066739970130563, guid: ab052b550fce0f842892f8db48e39e85,
-    type: 3}
-  diamondPrefab: {fileID: 239850220055032100, guid: 0097002da5973b14abcba9bc22e1fc83,
-    type: 3}
-  waterPrefab: {fileID: 3845546374425623244, guid: c7e954bf5363cbc43bd51885cd9ed86b,
-    type: 3}
+  dirtData: {fileID: 11400000, guid: b7e288903ef2f8c48a900531a90cdd86, type: 2}
+  grassData: {fileID: 11400000, guid: e4afa24eba5260840addcd50f9d8afe7, type: 2}
+  stoneData: {fileID: 11400000, guid: 9dfa2af0fc2b95a4096e3a14497a1628, type: 2}
+  waterData: {fileID: 11400000, guid: 8a9d54dc7baeda94f975be03c96bc51e, type: 2}
+  oreRules: []
+  decorationRules:
+  - name: Wood
+    data: {fileID: 11400000, guid: 66795f6b7cbf4314e8445718d787ab6d, type: 2}
+    probability: 0.35
   width: 20
   depth: 20
   maxHeight: 16
@@ -1744,11 +1732,11 @@ MonoBehaviour:
   hitMask:
     serializedVersion: 2
     m_Bits: 4294967295
-  toolDamage: 1
+  handDamage: 1
   rayDistance: 5
   hitCooldown: 0.15
   inventory: {fileID: 645698763}
-  selectedBlock: {fileID: 1354708300}
+  selectedBlockPreview: {fileID: 1354708300}
 --- !u!143 &1124147349
 CharacterController:
   m_ObjectHideFlags: 0

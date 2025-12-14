@@ -9,14 +9,16 @@ public class CraftingPanel : MonoBehaviour
 {
     public Inventory inventory;
     public List<CraftingRecipe> recipeList;
+
     public GameObject root;
     public TMP_Text plannedText;
     public Button craftButton;
     public Button clearButton;
     public TMP_Text hintText;
+
     public bool isOpen;
 
-    readonly Dictionary<ItemType, int> planned = new();
+    readonly Dictionary<ItemData, int> planned = new Dictionary<ItemData, int>();
     
     CrosshairUI crosshairUI;
     PlayerController_MC playerController;
@@ -25,6 +27,7 @@ public class CraftingPanel : MonoBehaviour
     {
         crosshairUI = FindObjectOfType<CrosshairUI>();
         playerController = FindObjectOfType<PlayerController_MC>();
+        inventory = FindObjectOfType<Inventory>();
     }
 
     private void Start()
@@ -48,18 +51,34 @@ public class CraftingPanel : MonoBehaviour
         isOpen = open;
         if(root) root.SetActive(open);
         if (!open) ClearPlanned();
+
         if (crosshairUI) crosshairUI.SetCursorStatus(open);
         if (playerController) playerController.isUiOpen = open;
     }
 
-    public void AddPlanned(ItemType type, int count = 1)
+    public void AddPlanned(ItemData data, int count = 1)
     {
-        if (!planned.ContainsKey(type)) planned[type] = 0;
+        if (data == null) return;
 
-        planned[type] += count;
+        int myStock = inventory.GetCount(data);
+        int currentPlanned = 0;
+
+        if (planned.ContainsKey(data))
+        {
+            currentPlanned = planned[data];
+        }
+
+        if (currentPlanned + count > myStock)
+        {
+            SetHint("더 이상 재료가 없습니다.");
+            return;
+        }
+
+        if (!planned.ContainsKey(data)) planned[data] = 0;
+        planned[data] += count;
 
         RefreshPlannedUI();
-        SetHint($"{type} x{count} 추가 완료");
+        SetHint($"{data.itemName} x{count} 추가 완료");
     }
 
 
@@ -83,7 +102,7 @@ public class CraftingPanel : MonoBehaviour
 
         foreach (var item in planned)
         {
-            sb.AppendLine($"{item.Key} x{item.Value}");
+            sb.AppendLine($"{item.Key.itemName} x{item.Value}");
         }
 
         plannedText.text = sb.ToString();
@@ -106,43 +125,44 @@ public class CraftingPanel : MonoBehaviour
         {
             if(inventory.GetCount(plannedItem.Key) < plannedItem.Value)
             {
-                SetHint($"{plannedItem.Key} 가 부족합니다.");
+                SetHint($"{plannedItem.Key.itemName} 가 부족합니다.");
                 return;
             }
         }
 
-        var matchedProduct = FindMatch(planned);
+        var matchedRecipe = FindMatch(planned);
 
-        if (matchedProduct == null)
+        if (matchedRecipe == null)
         {
             SetHint("알맞는 레시피가 없습니다.");
             return;
         }
 
-        foreach (var itemforConsume in planned) inventory.Consume(itemforConsume.Key, itemforConsume.Value);
-        foreach (var p in matchedProduct.outputs) inventory.Add(p.type, p.count);
+        foreach (var item in planned) inventory.Consume(item.Key, item.Value);
+        foreach (var p in matchedRecipe.outputs) inventory.Add(p.data, p.count);
 
         ClearPlanned();
-
-        SetHint($"조합 완료 : {matchedProduct.displayName}");
+        SetHint($"조합 완료 : {matchedRecipe.displayName}");
     }
 
-    CraftingRecipe FindMatch(Dictionary<ItemType, int> planned)
+    CraftingRecipe FindMatch(Dictionary<ItemData, int> currentPlan)
     {
         foreach(var recipe in recipeList)
         {
-            bool ok = true;
+            if (recipe.inputs.Count != currentPlan.Count) continue;
 
-            foreach(var ing in recipe.inputs)
+            bool isMatch = true;
+
+            foreach (var ing in recipe.inputs)
             {
-                if(!planned.TryGetValue(ing.type, out int have) || have != ing.count)
+                if(!currentPlan.TryGetValue(ing.data, out int plannedCount) || plannedCount != ing.count)
                 {
-                    ok = false;
+                    isMatch = false;
                     break;
                 }
             }
 
-            if (ok) return recipe;
+            if (isMatch) return recipe;
         }
 
         return null;

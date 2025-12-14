@@ -1,44 +1,42 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class Inventory : MonoBehaviour
 {
-    public Dictionary<ItemType, int> items = new();
-    InventoryUI inventoryUI;
+    public Dictionary<ItemData, int> items = new Dictionary<ItemData, int>();
+    public event Action OnInventoryChanged;
 
-    private void Start()
+    public int GetCount(ItemData data)
     {
-        inventoryUI = FindObjectOfType<InventoryUI>();
-    }
-
-    public int GetCount(ItemType id)
-    {
-        items.TryGetValue(id, out var count);
+        if (data == null) return 0;
+        items.TryGetValue(data, out var count);
         return count;
     }
 
-    public void Add(ItemType type, int count = 1)
+    public void Add(ItemData data, int count = 1)
     {
-        if (!items.ContainsKey(type)) items[type] = 0;
-        items[type] += count;
-        inventoryUI.UpdateInventory(this);
+        if (data == null) return;
+
+        if (!items.ContainsKey(data)) items[data] = 0;
+        items[data] += count;
+        OnInventoryChanged?.Invoke();
     }
 
-    public bool Consume(ItemType type, int count = 1)
+    public bool Consume(ItemData data, int count = 1)
     {
-        if(!items.TryGetValue(type, out var have) || have < count) return false;
+        if (data == null) return false;
+        if (!items.TryGetValue(data, out var have) || have < count) return false;
 
-        items[type] = have - count;
+        items[data] = have - count;
 
-        if (items[type] == 0)
+        if (items[data] == 0)
         {
-            items.Remove(type);
-            inventoryUI.selectedIndex = -1;
-            inventoryUI.ResetSelection();
+            items.Remove(data);
         }
 
-        inventoryUI.UpdateInventory(this);
+        OnInventoryChanged?.Invoke();
         return true;
     }
 }

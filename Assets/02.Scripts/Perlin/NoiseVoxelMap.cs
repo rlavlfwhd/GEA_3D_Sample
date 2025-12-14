@@ -4,12 +4,31 @@ using UnityEngine;
 
 public class NoiseVoxelMap : MonoBehaviour
 {
-    public GameObject dirtPrefab;
-    public GameObject grassPrefab;
-    public GameObject woodPrefab;
-    public GameObject stonePrefab;
-    public GameObject diamondPrefab;
-    public GameObject waterPrefab;
+    public ItemData dirtData;
+    public ItemData grassData;
+    public ItemData stoneData;
+    public ItemData waterData;
+
+    [System.Serializable]
+    public struct OreRule
+    {
+        public string name;
+        public ItemData data;
+        [Range(0, 100)] public int minHeight;
+        [Range(0, 100)] public int maxHeight; 
+        [Range(0f, 1f)] public float probability;
+    }
+
+    [System.Serializable]
+    public struct DecorationRule
+    {
+        public string name;
+        public ItemData data;
+        [Range(0f, 1f)] public float probability;
+    }
+
+    public List<OreRule> oreRules = new List<OreRule>();
+    public List<DecorationRule> decorationRules = new List<DecorationRule>();
 
     public int width = 20;
     public int depth = 20;
@@ -19,6 +38,11 @@ public class NoiseVoxelMap : MonoBehaviour
     [SerializeField] float noiseScale = 20f;
 
     private void Start()
+    {
+        GenerateMap();
+    }
+
+    void GenerateMap()
     {
         float offsetX = Random.Range(-9999f, 9999f);
         float offsetZ = Random.Range(-9999f, 9999f);
@@ -38,103 +62,67 @@ public class NoiseVoxelMap : MonoBehaviour
                 {
                     if (y == h)
                     {
-                        PlaceGrass(x, y, z);
+                        CreateBlock(x, y, z, grassData);
 
-                        if (y > waterHeight && Random.value < 0.1f)
+                        if (y > waterHeight)
                         {
-                            PlaceWood(x, y + 1, z);
+                            foreach (var deco in decorationRules)
+                            {
+                                if (Random.value < deco.probability)
+                                {
+                                    CreateBlock(x, y + 1, z, deco.data);
+                                    break;
+                                }
+                            }
                         }
                     }
                     else if(y > h -3)
                     {
-                        PlaceDirt(x, y, z);
+                        CreateBlock(x, y, z, dirtData);
                     }
                     else
                     {
-                        if (y < 5 && Random.value < 0.05f)
+                        ItemData blockToPlace = stoneData;
+
+                        foreach (var rule in oreRules)
                         {
-                            PlaceDiamond(x, y, z);
+                            if (y >= rule.minHeight && y <= rule.maxHeight)
+                            {
+                                if (Random.value < rule.probability)
+                                {
+                                    blockToPlace = rule.data;
+                                    break;
+                                }
+                            }
                         }
-                        else
-                        {
-                            PlaceStone(x, y, z);
-                        }
+                        CreateBlock(x, y, z, blockToPlace);
                     }
                 }
 
                 for(int y = h + 1; y <= waterHeight; y++)
                 {
-                    PlaceWater(x, y, z);
+                    CreateBlock(x, y, z, waterData);
                 }
             }
         }
     }
 
-    void PlaceDirt(int x, int y, int z)
+    void CreateBlock(int x, int y, int z, ItemData data)
     {
-        CreateBlock(dirtPrefab, x, y, z, ItemType.Dirt, 2, 1, true);
-    }
+        if (data == null || data.blockPrefab == null) return;
 
-    void PlaceWater(int x, int y, int z)
-    {
-        CreateBlock(waterPrefab, x, y, z, ItemType.Water, 3, 1, false);
-    }
-
-    void PlaceGrass(int x, int y, int z)
-    {
-        CreateBlock(grassPrefab, x, y, z, ItemType.Grass, 1, 1, true);
-    }
-
-    void PlaceWood(int x, int y, int z)
-    {
-        CreateBlock(woodPrefab, x, y, z, ItemType.Wood, 4, 1, true);
-    }
-    void PlaceStone(int x, int y, int z)
-    {
-        CreateBlock(stonePrefab, x, y, z, ItemType.Stone, 6, 1, true);
-    }
-
-    void PlaceDiamond(int x, int y, int z)
-    {
-        CreateBlock(diamondPrefab, x, y, z, ItemType.Diamond, 10, 1, true);
-    }
-
-    void CreateBlock(GameObject prefab, int x, int y, int z, ItemType type, int hp, int drop, bool mineable)
-    {
-        if (prefab == null) return;
-
-        var go = Instantiate(prefab, new Vector3(x, y, z), Quaternion.identity, transform);
-        go.name = $"{type}_{x}_{y}_{z}";
+        var go = Instantiate(data.blockPrefab, new Vector3(x, y, z), Quaternion.identity, transform);
+        go.name = $"{data.itemName}_{x}_{y}_{z}";
 
         var b = go.GetComponent<Block>() ?? go.AddComponent<Block>();
-        b.type = type;
-        b.maxHP = hp;
-        b.dropCount = drop;
-        b.mineable = mineable;
+        b.data = data;
+        b.hp = data.maxHP;
     }
 
-    public void PlaceTile(Vector3Int pos, ItemType type)
+    public void PlaceTile(Vector3Int pos, ItemData data)
     {
-        switch(type)
-        {
-            case ItemType.Dirt:
-                PlaceDirt(pos.x, pos.y, pos.z);
-                break;
-            case ItemType.Grass:
-                PlaceGrass(pos.x, pos.y, pos.z);
-                break;
-            case ItemType.Water:
-                PlaceWater(pos.x, pos.y, pos.z);
-                break;
-            case ItemType.Diamond:
-                PlaceDiamond(pos.x, pos.y, pos.z);
-                break;
-            case ItemType.Wood:
-                PlaceWood(pos.x, pos.y, pos.z);
-                break;
-            case ItemType.Stone:
-                PlaceStone(pos.x, pos.y, pos.z);
-                break;
-        }
+        if (data == null || data.blockPrefab == null) return;
+
+        CreateBlock(pos.x, pos.y, pos.z, data);
     }
 }

@@ -6,22 +6,18 @@ using UnityEngine.UI;
 
 public class InventoryUI : MonoBehaviour
 {
-    public Sprite dirtSprite;
-    public Sprite diamondSprite;
-    public Sprite grassSprite;
-    public Sprite waterSprite;
-    public Sprite woodSprite;
-    public Sprite stoneSprite;
-
-    public Sprite axeSprite;
-    public Sprite shovelSprite;
-    public Sprite pickaxeSprite;
-
     public List<Transform> Slot = new List<Transform>();
     public GameObject SlotItem;
     List<GameObject> items = new List<GameObject>();
 
     public int selectedIndex = -1;
+    Inventory inventory;
+
+    private void Awake()
+    {
+        inventory = FindObjectOfType<Inventory>();       
+        if (inventory != null) inventory.OnInventoryChanged += UpdateInventoryUI;
+    }
 
     private void Update()
     {
@@ -37,21 +33,14 @@ public class InventoryUI : MonoBehaviour
     public void SetSelectedIndex(int idx)
     {
         ResetSelection();
-        if(selectedIndex == idx)
+        if (selectedIndex == idx || idx >= items.Count)
         {
             selectedIndex = -1;
         }
         else
         {
-            if(idx >= items.Count)
-            {
-                selectedIndex = -1;
-            }
-            else
-            {
-                SetSelection(idx);
-                selectedIndex = idx;
-            }
+            SetSelection(idx);
+            selectedIndex = idx;
         }
     }
 
@@ -68,12 +57,13 @@ public class InventoryUI : MonoBehaviour
         Slot[_idx].GetComponent<Image>().color = Color.yellow;
     }
 
-    public ItemType GetInventorySlot()
+    public ItemData GetSelectedData()
     {
-        return items[selectedIndex].GetComponent<SlotItemPrefab>().blockType;
+        if (selectedIndex < 0 || selectedIndex >= items.Count) return null;
+        return items[selectedIndex].GetComponent<SlotItemPrefab>().itemData;
     }
 
-    public void UpdateInventory(Inventory myInven)
+    public void UpdateInventoryUI()
     {
         foreach(var slotItems in items)
         {
@@ -83,45 +73,26 @@ public class InventoryUI : MonoBehaviour
 
         int idx = 0;
 
-        foreach(var item in myInven.items)
+        foreach (var kvp in inventory.items)
         {
+            if (idx >= Slot.Count) break;
+            ItemData data = kvp.Key;
+            int count = kvp.Value;
+
             var go = Instantiate(SlotItem, Slot[idx].transform);
             go.transform.localPosition = Vector3.zero;
+
             SlotItemPrefab sItem = go.GetComponent<SlotItemPrefab>();
+            sItem.ItemSetting(data, count);
+
             items.Add(go);
-
-            switch(item.Key)
-            {
-                case ItemType.Dirt:
-                    sItem.ItemSetting(dirtSprite, "x" + item.Value.ToString(), item.Key);
-                    break;
-                case ItemType.Grass:
-                    sItem.ItemSetting(grassSprite, "x" + item.Value.ToString(), item.Key);
-                    break;
-                case ItemType.Water:
-                    sItem.ItemSetting(waterSprite, "x" + item.Value.ToString(), item.Key);
-                    break;
-                case ItemType.Diamond:
-                    sItem.ItemSetting(diamondSprite, "x" + item.Value.ToString(), item.Key);
-                    break;
-                case ItemType.Axe:
-                    sItem.ItemSetting(axeSprite, "x" + item.Value.ToString(), item.Key);
-                    break;
-                case ItemType.Shovel:
-                    sItem.ItemSetting(shovelSprite, "x" + item.Value.ToString(), item.Key);
-                    break;
-                case ItemType.Pickaxe:
-                    sItem.ItemSetting(pickaxeSprite, "x" + item.Value.ToString(), item.Key);
-                    break;
-                case ItemType.Wood:
-                    sItem.ItemSetting(woodSprite, "x" + item.Value.ToString(), item.Key);
-                    break;
-                case ItemType.Stone:
-                    sItem.ItemSetting(stoneSprite, "x" + item.Value.ToString(), item.Key);
-                    break;
-            }
-
             idx++;
+        }
+
+        if (selectedIndex >= items.Count)
+        {
+            selectedIndex = -1;
+            ResetSelection();
         }
     }
 }

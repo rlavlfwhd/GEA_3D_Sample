@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 456256447345496266}
   m_Layer: 0
   m_Name: Water
-  m_TagString: Block
+  m_TagString: Water
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -118,8 +118,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 371b077f0753ab848aae46ef19e53d0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  type: 2
-  maxHP: 3
+  data: {fileID: 11400000, guid: 8a9d54dc7baeda94f975be03c96bc51e, type: 2}
   hp: 0
   dropCount: 1
-  mineable: 0

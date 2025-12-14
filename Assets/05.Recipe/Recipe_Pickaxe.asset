@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 582c519a9e83d034f9b3470622b8e80d, type: 3}
-  m_Name: Recipe_Shovel
+  m_Name: Recipe_Pickaxe
   m_EditorClassIdentifier: 
-  displayName: Shovel
+  displayName: Pickaxe
   inputs:
-  - type: 0
-    count: 2
+  - data: {fileID: 11400000, guid: 66795f6b7cbf4314e8445718d787ab6d, type: 2}
+    count: 4
   outputs:
-  - type: 7
+  - data: {fileID: 11400000, guid: 6c4dbe83d2c5098498042a1ba85ac85c, type: 2}
     count: 1

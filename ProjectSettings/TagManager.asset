@@ -5,7 +5,9 @@ TagManager:
   serializedVersion: 2
   tags:
   - Enemy
-  - Block
+  - Shovels
+  - Axes
+  - Pickaxes
   layers:
   - Default
   - TransparentFX

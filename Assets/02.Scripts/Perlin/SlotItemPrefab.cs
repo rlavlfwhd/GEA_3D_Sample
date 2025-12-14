@@ -9,14 +9,22 @@ public class SlotItemPrefab : MonoBehaviour, IPointerClickHandler
 {
     public Image itemImage;
     public TextMeshProUGUI itemText;
-    public ItemType blockType;
+    public ItemData itemData;
     public CraftingPanel craftingPanel;
 
-    public void ItemSetting(Sprite itemSprite, string txt, ItemType type)
+    public void ItemSetting(ItemData data, int count)
     {
-        itemImage.sprite = itemSprite;
-        itemText.text = txt;
-        blockType = type;
+        itemData = data;
+        itemImage.sprite = data.icon;
+
+        if (!data.isTool && count > 1)
+        {
+            itemText.text = count.ToString();
+        }
+        else
+        {
+            itemText.text = "";
+        }
     }
 
     void Awake()
@@ -29,6 +37,6 @@ public class SlotItemPrefab : MonoBehaviour, IPointerClickHandler
         if (eventData.button != PointerEventData.InputButton.Right) return;
         if (!craftingPanel) return;
 
-        craftingPanel.AddPlanned(blockType, 1);
+        craftingPanel.AddPlanned(itemData, 1);
     }
 }
