@@ -21,3 +21,4 @@ MonoBehaviour:
   effectiveTag: Pickaxes
   maxHP: 3
   isMineable: 0
+  isDroppable: 0

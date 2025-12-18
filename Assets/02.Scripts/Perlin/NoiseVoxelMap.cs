@@ -4,38 +4,32 @@ using UnityEngine;
 
 public class NoiseVoxelMap : MonoBehaviour
 {
-    public ItemData dirtData;
-    public ItemData grassData;
-    public ItemData stoneData;
-    public ItemData waterData;
-
-    [System.Serializable]
-    public struct OreRule
-    {
-        public string name;
-        public ItemData data;
-        [Range(0, 100)] public int minHeight;
-        [Range(0, 100)] public int maxHeight; 
-        [Range(0f, 1f)] public float probability;
-    }
-
-    [System.Serializable]
-    public struct DecorationRule
-    {
-        public string name;
-        public ItemData data;
-        [Range(0f, 1f)] public float probability;
-    }
-
-    public List<OreRule> oreRules = new List<OreRule>();
-    public List<DecorationRule> decorationRules = new List<DecorationRule>();
-
-    public int width = 20;
-    public int depth = 20;
+    public int width = 30;
+    public int depth = 90;
     public int maxHeight = 16;
     public int waterHeight = 4;
 
     [SerializeField] float noiseScale = 20f;
+
+    public ItemData forestDirt;
+    public ItemData forestGrass;
+    public ItemData forestStone;
+    public ItemData forestWater;
+    [Range(0f, 1f)] public float treeProbability = 0.05f;
+    public ItemData treeLog;
+
+    public ItemData snowGrass;
+    public ItemData snowDirt;
+    public ItemData iceBlock;
+    public ItemData ironOre;
+    [Range(0f, 1f)] public float ironProbability = 0.08f;
+
+    public ItemData volcanoAsh;
+    public ItemData volcanoRock;
+    public ItemData lavaBlock;
+    public ItemData diamondOre;
+    [Range(0f, 1f)] public float diamondProbability = 0.06f;
+
 
     private void Start()
     {
@@ -46,6 +40,8 @@ public class NoiseVoxelMap : MonoBehaviour
     {
         float offsetX = Random.Range(-9999f, 9999f);
         float offsetZ = Random.Range(-9999f, 9999f);
+
+        int zoneLength = depth / 3;
 
         for (int x = 0; x < width; x++)
         {
@@ -58,50 +54,60 @@ public class NoiseVoxelMap : MonoBehaviour
 
                 if (h <= 0) h = 1;
 
+                int currentBiome = 0;
+                if (z >= zoneLength && z < zoneLength * 2) currentBiome = 1;
+                else if (z >= zoneLength * 2) currentBiome = 2;
+
+                bool isUnderwater = (h < waterHeight);
+
                 for (int y = 0; y <= h; y++)
                 {
-                    if (y == h)
-                    {
-                        CreateBlock(x, y, z, grassData);
+                    ItemData blockToPlace = null;
 
-                        if (y > waterHeight)
+                    if (currentBiome == 0) blockToPlace = forestDirt;
+                    else if (currentBiome == 1) blockToPlace = snowDirt;
+                    else blockToPlace = volcanoRock;
+
+                    if (y < h - 2)
+                    {
+                        if (currentBiome == 1 && Random.value < ironProbability) blockToPlace = ironOre;
+                        else if (currentBiome == 2 && Random.value < diamondProbability) blockToPlace = diamondOre;
+                        else if (currentBiome == 0 && y < h - 4) blockToPlace = forestStone;
+                    }
+
+                    CreateBlock(x, y, z, blockToPlace);
+                }
+
+                if (!isUnderwater)
+                {
+                    if (currentBiome == 0)
+                    {
+                        if (forestGrass != null) CreateBlock(x, h + 1, z, forestGrass);
+
+                        if (Random.value < treeProbability && treeLog != null)
                         {
-                            foreach (var deco in decorationRules)
-                            {
-                                if (Random.value < deco.probability)
-                                {
-                                    CreateBlock(x, y + 1, z, deco.data);
-                                    break;
-                                }
-                            }
+                            CreateBlock(x, h + 1, z, treeLog);
+                            CreateBlock(x, h + 2, z, treeLog);
                         }
                     }
-                    else if(y > h -3)
+                    else if (currentBiome == 1)
                     {
-                        CreateBlock(x, y, z, dirtData);
+                        if (snowGrass != null) CreateBlock(x, h + 1, z, snowGrass);
                     }
-                    else
+                    else if (currentBiome == 2)
                     {
-                        ItemData blockToPlace = stoneData;
-
-                        foreach (var rule in oreRules)
-                        {
-                            if (y >= rule.minHeight && y <= rule.maxHeight)
-                            {
-                                if (Random.value < rule.probability)
-                                {
-                                    blockToPlace = rule.data;
-                                    break;
-                                }
-                            }
-                        }
-                        CreateBlock(x, y, z, blockToPlace);
+                        if (volcanoAsh != null) CreateBlock(x, h + 1, z, volcanoAsh);
                     }
                 }
 
-                for(int y = h + 1; y <= waterHeight; y++)
+                for (int y = h + 1; y <= waterHeight; y++)
                 {
-                    CreateBlock(x, y, z, waterData);
+                    ItemData liquidToPlace = forestWater;
+
+                    if (currentBiome == 1) liquidToPlace = iceBlock;
+                    else if (currentBiome == 2) liquidToPlace = lavaBlock;
+
+                    CreateBlock(x, y, z, liquidToPlace);
                 }
             }
         }
@@ -111,7 +117,9 @@ public class NoiseVoxelMap : MonoBehaviour
     {
         if (data == null || data.blockPrefab == null) return;
 
-        var go = Instantiate(data.blockPrefab, new Vector3(x, y, z), Quaternion.identity, transform);
+        Vector3 spawnPos = new Vector3(x, y + data.verticalOffset, z);
+
+        var go = Instantiate(data.blockPrefab, spawnPos, Quaternion.identity, transform);
         go.name = $"{data.itemName}_{x}_{y}_{z}";
 
         var b = go.GetComponent<Block>() ?? go.AddComponent<Block>();

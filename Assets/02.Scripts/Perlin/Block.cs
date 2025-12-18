@@ -23,7 +23,7 @@ public class Block : MonoBehaviour
 
         if(hp <= 0)
         {
-            if (inven != null && dropCount > 0 && data != null)
+            if (inven != null && dropCount > 0 && data != null && data.isDroppable)
             {
                 inven.Add(data, dropCount);
             }

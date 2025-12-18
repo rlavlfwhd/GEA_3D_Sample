@@ -14,4 +14,6 @@ public class ItemData : ScriptableObject
     public string effectiveTag;
     public int maxHP = 3;
     public bool isMineable = true;
+    public bool isDroppable = true;
+    public float verticalOffset = 0f;
 }
